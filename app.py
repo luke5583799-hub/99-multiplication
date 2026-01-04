@@ -23,7 +23,7 @@ if 'num1' not in st.session_state: st.session_state.num1 = random.randint(2, 9)
 if 'num2' not in st.session_state: st.session_state.num2 = random.randint(2, 9)
 if 'game_over' not in st.session_state: st.session_state.game_over = False
 if 'feedback' not in st.session_state: st.session_state.feedback = ""
-if 'user_input_str' not in st.session_state: st.session_state.user_input_str = "" # 用字串存輸入，就不會有預設0的問題
+if 'user_input_str' not in st.session_state: st.session_state.user_input_str = ""
 if 'total_questions' not in st.session_state: st.session_state.total_questions = 20
 
 # --- 詞庫 ---
@@ -86,36 +86,30 @@ def restart_game():
 st.title("🚀 超級 99 乘法大挑戰")
 
 if not st.session_state.game_over:
-    # 進度條
+    # 1. 顯示進度
     progress = (st.session_state.current_q - 1) / st.session_state.total_questions
     st.progress(progress)
     st.write(f"第 {st.session_state.current_q} / {st.session_state.total_questions} 題")
     
-    # 顯示題目與目前的輸入 (如果還沒輸入就顯示 ?)
+    # 2. 顯示題目 (位置固定)
     display_ans = st.session_state.user_input_str if st.session_state.user_input_str else "?"
     st.markdown(
-        f"<h1 style='text-align: center; color: #333;'>{st.session_state.num1} × {st.session_state.num2} = <span style='color: #FF4B4B; border-bottom: 2px solid #FF4B4B;'>{display_ans}</span></h1>", 
+        f"<h1 style='text-align: center; color: #333; margin-bottom: 20px;'>{st.session_state.num1} × {st.session_state.num2} = <span style='color: #FF4B4B; border-bottom: 2px solid #FF4B4B;'>{display_ans}</span></h1>", 
         unsafe_allow_html=True
     )
     
-    # 顯示回饋訊息
-    if st.session_state.feedback:
-        if "✅" in st.session_state.feedback:
-            st.success(st.session_state.feedback)
-        else:
-            st.error(st.session_state.feedback)
-        st.session_state.feedback = "" # 顯示一次後清空，避免卡在畫面上
+    # (原本這裡會顯示回饋，現在移除了，確保下方鍵盤不被推擠)
 
     st.write("---")
     
-    # --- 自製數字鍵盤區 (3欄版面) ---
+    # 3. 顯示鍵盤 (位置固定)
     c1, c2, c3 = st.columns(3)
     
     with c1:
         st.button("1", on_click=add_digit, args=(1,), use_container_width=True)
         st.button("4", on_click=add_digit, args=(4,), use_container_width=True)
         st.button("7", on_click=add_digit, args=(7,), use_container_width=True)
-        st.button("↺ 清除", on_click=clear_input, use_container_width=True) # 清除全部
+        st.button("↺ 清除", on_click=clear_input, use_container_width=True) 
 
     with c2:
         st.button("2", on_click=add_digit, args=(2,), use_container_width=True)
@@ -127,11 +121,21 @@ if not st.session_state.game_over:
         st.button("3", on_click=add_digit, args=(3,), use_container_width=True)
         st.button("6", on_click=add_digit, args=(6,), use_container_width=True)
         st.button("9", on_click=add_digit, args=(9,), use_container_width=True)
-        st.button("⬅️ 退格", on_click=delete_digit, use_container_width=True) # 刪除一個字
+        st.button("⬅️ 退格", on_click=delete_digit, use_container_width=True) 
 
-    # 送出按鈕 (特別大)
-    st.write("") # 空一行
+    # 4. 送出按鈕 (位置固定)
+    st.write("") 
     st.button("送出答案 ✨", on_click=check_answer, type="primary", use_container_width=True)
+
+    # 5. 顯示回饋 (移到最下方！這樣就不會影響上面的排版)
+    if st.session_state.feedback:
+        st.write("") # 空一點距離
+        if "✅" in st.session_state.feedback:
+            st.success(st.session_state.feedback)
+        else:
+            st.error(st.session_state.feedback)
+        # 顯示完後清空，避免下次重整還在
+        st.session_state.feedback = ""
 
 else:
     # --- 結算畫面 ---
